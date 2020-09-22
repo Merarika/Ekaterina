@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> My To-Do List </title>
+	<link rel="stylesheet" type="text/css" href="css/styles.css">
+</head>
+<body>
+	<section class="main-area">
+		<div class="m-t-wrap ">
+			<h1 class="main_title"> My To-Do List </h1>
+			<img src="img/pen.png">	
+		</div>
+		<div class="creating_area">
+			<input id="input_add" placeholder="Add to do">
+			<button id="btnAdd"> Add </button>
+		</div>
+		<div class="list"></div>
+		<div class="clear-wrap">
+			<button id="clear"> Clear cache </button>
+		</div>
+	</section>
+	<script type="text/javascript">
+		
+		var list_local = [];
+
+		var items = document.querySelector('.list');
+		
+
+		if (localStorage.getItem('list_local') != undefined) {
+			list_local = JSON.parse(localStorage.getItem('list_local'));
+			create_list_item();
+		}
+
+		var btn_add = document.querySelector('#btnAdd');
+		btn_add.addEventListener('click', function() {
+
+			var input = document.querySelector('#input_add').value;
+			if(!input) {
+				empty('You have something to do, I think. So don\'t kid me, please :)');
+				return;
+			}
+
+			var list_obj = {};
+			list_obj.text = input;
+			list_obj.check = false;
+
+
+			list_local.push(list_obj);
+
+			create_list_item();
+			save();
+		});
+		
+		function create_list_item() {
+
+			items.innerHTML = '';
+			
+			for (var key in list_local) {
+
+				var item = document.createElement('div');
+				item.classList.add('list_item');
+
+				var to_do = document.createElement('span');
+				to_do.appendChild(document.createTextNode(list_local[key].text));
+				to_do.classList.add('to_do-text');
+
+				var checkbox = document.createElement('input');
+				checkbox.type = 'checkbox';
+				checkbox.checked = list_local[key].check;
+				checkbox.onchange = check;
+
+				if(checkbox.checked) {
+					to_do.classList.add('made');
+				}
+				
+				var btn_remove = document.createElement('button');
+				btn_remove.classList.add('btn_delete');
+				btn_remove.onclick = remove;
+				
+				item.setAttribute('id', key);
+				item.append(checkbox);
+				item.append(to_do);
+				item.append(btn_remove);
+
+				items.append(item);
+				
+			}
+		}
+
+		var btn_clear = document.getElementById('clear');
+		btn_clear.onclick = function() {
+				localStorage.clear();
+		}
+
+		function empty(message) {
+			var mistake = document.createElement('div');
+			mistake.classList.add('mistake_wrap');
+			mistake.innerText = message;
+
+			items.append(mistake);
+
+			setTimeout(function() {
+				mistake.remove();
+			}, 3000);
+		}
+	
+		function check(e) {
+			var id = e.target.parentNode.getAttribute('id');
+			list_local[id].check = !list_local[id].check;
+			
+			create_list_item();
+			save();
+		}
+		
+		function remove(e) {
+			var id = e.target.parentNode.getAttribute('id');
+			list_local.splice(id, 1);
+			
+			create_list_item();
+			save();
+		}
+		
+		function save() {
+			localStorage.setItem('list_local', JSON.stringify(list_local));
+		}
+
+	</script>
+</body>
+</html>
